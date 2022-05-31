@@ -49,6 +49,11 @@ Encountered a total of �[31m1�[0m failing tests, �[32m0�[0m tests succee
   } 
 ```
 
+頭痛的問題是各種補充實作的 selector，未來有機會再跟大家分享。
+其中一個我提出來並解決的問題後來被加到官方文件的 NFT 測試範例裡面了！
+1. [Error From Testing ERC-721 Contract Mint Function #964](https://github.com/foundry-rs/foundry/discussions/964)
+2. [Catching custom error](https://ethereum.stackexchange.com/questions/125238/catching-custom-error)
+
 ### 3. bash: make: command not found
 
 到此[連結](https://chocolatey.org/install#individual)下載 choco，完成之後輸入以下指令：
@@ -97,6 +102,27 @@ $ choco install make
         // the only "external" call above is "farm.transferOwnership()"
     }
 
+```
+
+### 6. old cheat code
+
+
+前一個版本的 Foundry 是利用宣告 `CheatCodes` 的介面，後在測試合約裡面宣告 `cheats`。最後只要在我們想要測試的合約裡面加上 `cheats.prank(address(0));` 就可以把自己的角度轉成 `address(0)`。
+```solidity=
+interface CheatCodes {
+  function prank(address) external;
+}
+
+contract ContractTest is DSTest {
+  CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+    
+  // skip the code...
+    
+  function testFailNotWLMint() public {
+    cheats.prank(address(0));
+    carman.preSaleMint(10);
+  }  
+}
 ```
 
 ---
