@@ -63,6 +63,42 @@ $ choco install make
 4. 查看 vm 和 test 原始碼
 5. 查看 forge-std 原始碼
 
+### 5. msg.sender
+
+```
+/** Unit Testing For Mock Contracts*/
+
+    function testPrank1() public {
+        assertEq(DEPLOYER_ADDRESS, farm.owner()); // now owner() is DEPLOYER
+        farm.transferOwnership(msg.sender); 
+        // the transaction originator of transferOwnership is the "contract" ---> DEPLOYER == address(this)  
+        assertEq(msg.sender, farm.owner()); // transfer successfully
+        // now owner is the "msg.sender" ---> <sender_in_foundry.toml>
+
+        vm.prank(DEPLOYER_ADDRESS);  // change the "msg.sender" ---> DEPLOYER == address(this)
+        vm.expectRevert(farm.transferOwnership(msg.sender));
+        /* ------ expectRevert 部分等價於以下註解程式碼 ------
+        try farm.transferOwnership(msg.sender){
+            assertTrue(false, "prank failed!");
+            // transferOwnership should revert, 
+            // when "msg.sender" is now being the DEPLOYER, but the owner is <sender_in_foundry.toml>
+
+            // if transferOwnership not revert,
+            // it means the function called successfully,
+            // ---> the "msg.sender" is still the <sender_in_foundry.toml>
+            // ---> we prank failed.
+        } catch {
+            assertTrue(true);
+            // revert successfully
+        }
+        */
+
+        // The most important thing is that the prank is only useful for "external" call
+        // the only "external" call above is "farm.transferOwnership()"
+    }
+
+```
+
 ---
 
 ## Others
